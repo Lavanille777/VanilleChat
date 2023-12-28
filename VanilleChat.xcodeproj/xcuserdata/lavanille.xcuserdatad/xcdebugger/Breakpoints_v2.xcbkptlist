@@ -81,6 +81,21 @@
                   endingLineNumber = "9"
                   offsetFromSymbolStart = "112">
                </Location>
+               <Location
+                  uuid = "6DD5A6E2-5DCE-45A8-A956-B07B18B93730 - e995adf0a36d1c17"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "MarkdownUI.DefaultImageProvider.makeImage(url: Swift.Optional&lt;Foundation.URL&gt;) -&gt; some"
+                  moduleName = "VanilleChat"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/lavanille/Downloads/swift-markdown-ui-main/Sources/MarkdownUI/Extensibility/DefaultImageProvider.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "7"
+                  endingLineNumber = "7"
+                  offsetFromSymbolStart = "180">
+               </Location>
             </Locations>
          </BreakpointContent>
       </BreakpointProxy>
@@ -98,6 +113,38 @@
             endingLineNumber = "8"
             landmarkName = "init(idealSize:@ViewBuilder:)"
             landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "88C29A36-2C0F-440B-BE4A-C96FCD1859FF - 208cf69d7fec5060"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "MarkdownUI.ResizeToFit.init(idealSize: __C.CGSize, content: () -&gt; &#x3c4;_0_0) -&gt; MarkdownUI.ResizeToFit&lt;&#x3c4;_0_0&gt;"
+                  moduleName = "VanilleChat"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/lavanille/Downloads/swift-markdown-ui-main/Sources/MarkdownUI/Utility/ResizeToFit.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "8"
+                  endingLineNumber = "8"
+                  offsetFromSymbolStart = "252">
+               </Location>
+               <Location
+                  uuid = "88C29A36-2C0F-440B-BE4A-C96FCD1859FF - 208cf69d7fec5060"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "MarkdownUI.ResizeToFit.init(idealSize: __C.CGSize, content: () -&gt; &#x3c4;_0_0) -&gt; MarkdownUI.ResizeToFit&lt;&#x3c4;_0_0&gt;"
+                  moduleName = "VanilleChat"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/lavanille/Downloads/swift-markdown-ui-main/Sources/MarkdownUI/Utility/ResizeToFit.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "8"
+                  endingLineNumber = "8"
+                  offsetFromSymbolStart = "212">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -113,22 +160,6 @@
             startingLineNumber = "16"
             endingLineNumber = "16"
             landmarkName = "init(name:bundle:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "F2BFC028-011C-47D2-AC31-FA2C6AA047CB"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "VanilleChat/ChatUI/ChatListCell.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "26"
-            endingLineNumber = "26"
-            landmarkName = "makeImage(url:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

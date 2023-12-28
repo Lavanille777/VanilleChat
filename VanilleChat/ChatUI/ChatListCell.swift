@@ -8,6 +8,7 @@
 import UIKit
 import SwiftUI
 import MarkdownUI
+import SwiftyMarkdown
 import SDWebImage
 import NetworkImage
 import SDWebImageSwiftUI
@@ -24,11 +25,6 @@ enum ChatListCellType {
 struct WebImageProvider: ImageProvider {
   func makeImage(url: URL?) -> some View {
       EmptyView()
-//    ResizeToFit {
-//        
-//      WebImage(url: url)
-//        .resizable()
-//    }
   }
 }
 
@@ -135,6 +131,8 @@ struct MarkdownLabel: View {
                 Color(role == .user ? "TextBackgroundUser" : "TextBackgroundAssistant")
             )
             .padding(0)
+            .selectionDisabled(false)
+            .textSelection(.enabled)
             .background(GeometryReader { geometryProxy in
                 Color.clear
                     .onChange(of: geometryProxy.size, { oldValue, newValue in
@@ -202,6 +200,8 @@ class ChatListCell: UITableViewCell {
     
     var useMarkDown: Bool = false
     
+    var delayLoad: Bool = false
+    
     var avatarImageView = UIImageView(
         image: UIImage(
             named: "chatgpt-icon-user"
@@ -225,14 +225,17 @@ class ChatListCell: UITableViewCell {
     
     var imgViews: [UIImageView] = []
     
+    var imgRatio: CGFloat = 1
+    
     var markDownLabel: UIView {
         markDownBridgeVC.view
     }
     
     var markDownBridgeVC = UIHostingController(rootView: MarkdownLabel())
     
-    var textMessageLabel = UILabel().then { l in
-        l.numberOfLines = 0
+    var textMessageLabel = UITextView().then { l in
+//        l.numberOfLines = 0
+        l.backgroundColor = .clear
     }
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -268,7 +271,20 @@ class ChatListCell: UITableViewCell {
 
     }
     
+    override func didMoveToSuperview() {
+        super.didMoveToSuperview()
+        print("cell didMoveToSuperview")
+        if delayLoad {
+            setupLayout()
+        }
+    }
+    
     func setupLayout() {
+        guard let superview else {
+            delayLoad = true
+            return
+        }
+        
         contentView.subviews.forEach { v in
             v.removeFromSuperview()
         }
@@ -317,10 +333,18 @@ class ChatListCell: UITableViewCell {
                     make.edges.equalToSuperview().inset(12)
                 } else {
                     make.top.left.right.equalToSuperview().inset(12)
+                    if let subview = markDownLabel.subviews.first {
+                        make.height.equalTo(subview.frame.height)
+                    }
                 }
             }
+            bubbleView.layoutIfNeeded()
+            
+            markDownLabel.subviews.forEach { subview in
+                print("markDownLabel  \(subview.frame)")
+            }
+            
             for (index, imgV) in imgViews.enumerated() {
-                guard let image = imgV.image else { return }
                 bubbleView.addSubview(imgV)
                 imgV.snp.remakeConstraints { make in
                     if index == 0 {
@@ -329,16 +353,18 @@ class ChatListCell: UITableViewCell {
                         make.top.equalTo(imgViews[index - 1].snp.bottom).offset(5)
                     }
                     make.left.right.equalTo(markDownLabel)
+                    let width = superview.frame.width - 49
                     make.height.equalTo(
-                        markDownLabel.frame.width * image.size.height / image.size.width
+                        width * imgRatio
                     )
-                    make.bottom.equalToSuperview().inset(12).priority(.low)
+                    make.bottom.equalToSuperview().inset(12)
                 }
             }
         } else {
             bubbleView.addSubview(textMessageLabel)
             textMessageLabel.snp.remakeConstraints { make in
-                make.edges.equalToSuperview().inset(12)
+                make.left.right.equalToSuperview().inset(8)
+                make.top.bottom.equalToSuperview().inset(5)
             }
         }
     }
@@ -348,6 +374,9 @@ class ChatListCell: UITableViewCell {
     }
     
     func loadModel() {
+        
+        delayLoad = false
+        
         imgViews.removeAll()
         
         if !model.avatarURL.isEmpty {
@@ -360,27 +389,29 @@ class ChatListCell: UITableViewCell {
         
         if useMarkDown {
             let urls = ChatListCell.extractImageURLs(from: text)
+            imgRatio = extractAspectRatio(from: text)
             urls.forEach { url in
                 let imageView = UIImageView()
                 imageView.isUserInteractionEnabled = true
                 imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(viewImage)))
                 imageView.sd_setImage(with: url) { [weak self] image, _, cacheType, _ in
                     self?.model.image = image
-                    guard let self, let superview = superview as? UITableView else { return }
-                    self.imgViews.append(imageView)
-                    print("=======cacheType :\(cacheType)")
-                    if cacheType != .memory {
-                        self.setupLayout()
-                        UIView.performWithoutAnimation {
-                            superview.beginUpdates()
-                            superview.endUpdates()
-                            self.firstLoad = false
-                        }
-                    }
+//                    guard let self, let superview = superview as? UITableView else { return }
+//                    self.imgViews.append(imageView)
+//                    print("=======cacheType :\(cacheType)")
+//                    if cacheType != .memory {
+//                        
+//                    }
                 }
+                self.imgViews.append(imageView)
             }
             markDownBridgeVC.rootView = MarkdownLabel(
-                sizeDidChange: model.cellSizeDidChange,
+                sizeDidChange: { size in
+                    DispatchQueue.main.async {
+                        self.setupLayout()
+                    }
+                    print("markdownlabel size changed: \(size)")
+                },
                 content: text,
                 role: model.type
             )
@@ -388,10 +419,10 @@ class ChatListCell: UITableViewCell {
             markDownBridgeVC.view.layoutIfNeeded()
         } else {
             textMessageLabel.then { l in
-                l.text = text
-                l.font = .systemFont(ofSize: 16)
-                l.textColor = .assistantText
-                
+                l.isScrollEnabled = false
+                l.isEditable = false
+                l.isSelectable = true
+                l.contentMode = .center
                 // 创建 NSMutableParagraphStyle 实例来设置行间距属性
                 let paragraphStyle = NSMutableParagraphStyle()
                 paragraphStyle.lineSpacing = 4
@@ -400,17 +431,46 @@ class ChatListCell: UITableViewCell {
                 let attributedString = NSMutableAttributedString(string: text)
                 attributedString.addAttribute(.paragraphStyle, value:paragraphStyle, range:NSMakeRange(0, attributedString.length))
                 attributedString.addAttribute(.foregroundColor, value: UIColor.assistantText, range: NSMakeRange(0, attributedString.length))
-
-                // 将属性化字符串设置给 UILabel
-                l.attributedText = attributedString
+                attributedString.addAttribute(.font, value: UIFont.systemFont(ofSize: 17), range: NSMakeRange(0, attributedString.length))
                 
+                // 将属性化字符串设置给 UILabel
+                let md = SwiftyMarkdown(string: text).attributedString()
+                l.attributedText = md
                 l.sizeToFit()
+                
+                
             }
         }
         
         nameLabel.text = model.type == .user ? "YOU" : "GPT"
         bubbleView.backgroundColor = model.type == .user ? model.bubbleUserColor : model.bubbleAssistantColor
         self.setupLayout()
+    }
+    
+    func extractAspectRatio(from string: String) -> CGFloat {
+        // 使用正则表达式匹配宽度和高度
+        let pattern = "\"size\":\"(\\d+)x(\\d+)\""
+        let regex = try? NSRegularExpression(pattern: pattern)
+        let nsString = string as NSString
+
+        let results = regex?.matches(in: string, range: NSRange(location: 0, length: nsString.length))
+        
+        if let match = results?.first {
+            // 提取宽度和高度的值
+            let widthRange = match.range(at: 1)
+            let heightRange = match.range(at: 2)
+            
+            if let widthString = nsString.substring(with: widthRange) as String?,
+               let heightString = nsString.substring(with: heightRange) as String?,
+               let width = Double(widthString),
+               let height = Double(heightString) {
+                // 返回宽高比
+                return CGFloat(height / width)
+            }
+        }
+        
+        // 如果没有匹配到或者有任何错误，返回 1
+        return 1
     }
     
     @objc func viewImage() {
@@ -500,6 +560,8 @@ class ChatListCell: UITableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         model.image = nil
+        delayLoad = false
+        self.imgViews.removeAll()
         contentView.subviews.forEach { v in
             v.removeFromSuperview()
         }

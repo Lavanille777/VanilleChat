@@ -52,11 +52,22 @@ class ChatViewController: UIViewController, ChatSessionViewModelDelegate {
         return v
     }()
     
+    lazy var selectedImageView = UIImageView().then { v in
+        v.isHidden = true
+    }
+    
     lazy var chatInputView = ChatInputView().then { v in
         v.addonsBLK = { [weak self] in
             guard let self else { return }
-            viewModel.sendMessage(content: v.inputTextView.text)
-            v.inputTextView.text = ""
+            viewModel.sendMessage(content: v.inputTextView.text + " \(selectedImagePath) ")
+            v.clearText()
+        }
+        v.sendImgBLK = { [weak self] in
+            guard let self else { return }
+            let imagePickerController = UIImagePickerController()
+            imagePickerController.delegate = self
+            imagePickerController.sourceType = .photoLibrary
+            self.present(imagePickerController, animated: true, completion: nil)
         }
     }
     
@@ -81,6 +92,10 @@ class ChatViewController: UIViewController, ChatSessionViewModelDelegate {
     var contentView = UIView()
     
     var viewModel = ChatSessionViewModel()
+    
+    var selectedImagePath: String = ""
+    
+    var lastContentSize: CGSize = .zero
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -118,6 +133,16 @@ class ChatViewController: UIViewController, ChatSessionViewModelDelegate {
             )
         ]
         setupUI()
+        viewModel.willStreaming = { [weak self] in
+            guard let self else { return }
+            lastContentSize = chatListView.contentSize
+        }
+        viewModel.onStreaming = {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                print("contentOffset: \(chatListView.contentOffset), contentSize: \(chatListView.contentSize)")
+            }
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -217,8 +242,8 @@ class ChatViewController: UIViewController, ChatSessionViewModelDelegate {
         view.addSubview(contentView)
         contentView.addSubview(chatListView)
         contentView.addSubview(chatInputView)
-        contentView.addSubview(downButton
-        )
+        contentView.addSubview(downButton)
+        contentView.addSubview(selectedImageView)
         contentView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
@@ -238,6 +263,13 @@ class ChatViewController: UIViewController, ChatSessionViewModelDelegate {
             make.bottom.equalTo(chatInputView.snp.top).offset(-5)
             make.width.height.equalTo(28)
         }
+        
+        selectedImageView.snp.makeConstraints { make in
+            make.left.equalTo(contentView.safeAreaInsets).inset(20)
+            make.bottom.equalTo(chatInputView.snp.top).offset(-20)
+            make.width.height.equalTo(88)
+        }
+        
     }
     
     @objc func presentMenuPage() {
@@ -276,13 +308,87 @@ class ChatViewController: UIViewController, ChatSessionViewModelDelegate {
         alert.addAction(UIAlertAction(title: "取消", style: .cancel))
         present(alert, animated: true)
     }
-
+    
 }
 
 class ChatListView: UITableView {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         superview?.endEditing(true)
         super.touchesBegan(touches, with: event)
+    }
+}
+
+extension ChatViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    // UIImagePickerControllerDelegate 方法
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true, completion: nil)
+        guard let image = info[.originalImage] as? UIImage else { return }
+        // 获取选中的图片
+        if let image = info[.originalImage] as? UIImage {
+            // 压缩图片
+            let compressedImageData = image.jpegData(compressionQuality: 0.5) // compressionQuality 在 0.0（最高压缩）到 1.0（最佳质量）之间
+            if let compressedImage = UIImage(data: compressedImageData!) {
+                // 在这里使用压缩后的图片
+                // 例如：将其显示在 UIImageView 上，或者上传到服务器
+                selectedImageView.image = image
+                selectedImageView.contentMode = .scaleAspectFill
+                selectedImageView.isHidden = false
+                uploadImage(image: image)
+            }
+        }
+    }
+    
+    // 上传图片到服务器
+    func uploadImage(image: UIImage) {
+        guard let imageData = image.jpegData(compressionQuality: 1) else { return }
+        let url = URL(string: "https://lavanille.fun:3000/upload")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        // 创建multipart form data的boundary
+        let boundary = "Boundary-\(UUID().uuidString)"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        
+        // 创建http body
+        var body = Data()
+        let boundaryPrefix = "--\(boundary)\r\n"
+        body.append(Data(boundaryPrefix.utf8))
+        body.append(Data("Content-Disposition: form-data; name=\"file\"; filename=\"image.jpg\"\r\n".utf8))
+        body.append(Data("Content-Type: image/jpeg\r\n\r\n".utf8))
+        body.append(imageData)
+        body.append(Data("\r\n".utf8))
+        body.append(Data("--\(boundary)--\r\n".utf8))
+        
+        // 发起上传请求
+        let session = URLSession.shared
+        let task = session.uploadTask(with: request, from: body) { data, response, error in
+            if let error = error {
+                print("Upload error: \(error)")
+                return
+            }
+            guard let response = response as? HTTPURLResponse,
+                  (200...299).contains(response.statusCode) else {
+                print("Server error")
+                return
+            }
+            if let mimeType = response.mimeType,
+               mimeType == "application/json",
+               let data = data {
+                do {
+                    // 将返回的数据解析为 JSON
+                    if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                       let fileUrl = json["fileUrl"] as? String {
+                        print("Uploaded file URL: \(fileUrl)")
+                        DispatchQueue.main.async {
+                            self.selectedImagePath = fileUrl
+                        }
+                    }
+                } catch {
+                    print("JSON error: \(error.localizedDescription)")
+                }
+            }
+        }
+        task.resume()
     }
 }
 
@@ -330,6 +436,18 @@ extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
 
     private func handleResendAction(at indexPath: IndexPath) {
         // 实现重新发送消息的逻辑
+        let selectedMessage = viewModel.dataSource[indexPath.row]
+        let removedMsgs = viewModel.dataSource.suffix(indexPath.row)
+        viewModel.dataSource.removeSubrange(indexPath.row...)
+        for removedMsg in removedMsgs {
+            for (index, message) in viewModel.config.compressedMemoryList.enumerated() {
+                if message.created == removedMsg.created {
+                    viewModel.config.compressedMemoryList.remove(at: index)
+                    break
+                }
+            }
+        }
+        viewModel.sendMessage(content: selectedMessage.content)
     }
 
     private func handleCopyAction(at indexPath: IndexPath) {
@@ -350,7 +468,6 @@ extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        print(scrollView.contentOffset)
         
         guard let navBar = navigationController?.navigationBar else { return }
         let safeAreaBottom = GlobleStateManager.shared.mainWindow.safeAreaInsets.bottom
@@ -366,11 +483,11 @@ extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
         gap -= 20
 #endif
         
-        if gap < 70 + (viewModel.isShowingKeyboard ? 0 : safeAreaBottom) {
-            print("scroll at bottom gap:\(gap)")
+        if gap < 90 + (viewModel.isShowingKeyboard ? 0 : safeAreaBottom) {
+//            print("scroll at bottom gap:\(gap)")
             viewModel.isAtBottom = true
         } else if gap > 40 {
-            print("scroll leave bottom gap:\(gap)")
+//            print("scroll leave bottom gap:\(gap)")
             viewModel.isAtBottom = false
         }
         

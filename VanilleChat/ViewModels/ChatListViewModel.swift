@@ -15,6 +15,10 @@ protocol ChatSessionViewModelDelegate: AnyObject {
 
 class ChatSessionViewModel {
     
+    var willStreaming: (()->())?
+    
+    var onStreaming:(()->())?
+    
     weak var delegate: ChatSessionViewModelDelegate?
     
     var config = ChatSessionsManager.shared.currentSessionConfig {
@@ -33,11 +37,17 @@ class ChatSessionViewModel {
     
     var lastScrollTime: TimeInterval = 0
     
+    var lastReloadTime: TimeInterval = 0
+    
     var dataSource: [ChatMessage] = ChatMessagesStorage.shared.loadMessagesFromFile(
         with: ChatSessionsManager.shared.currentSessionConfig.sessionID
     ) {
         didSet {
-            delegate?.reloadList()
+            let now = Date().timeIntervalSince1970 * 1000
+            if now - lastReloadTime > 100 {
+                delegate?.reloadList()
+                lastReloadTime = now
+            }
         }
     }
     
@@ -71,7 +81,7 @@ class ChatSessionViewModel {
         
         if config.compressMemoryEnable && config.compressedMemoryList.count > 0 {
             let compressedHistoryMessage = ChatMessage(
-                content: config.compressMemoryMethod,
+                content: config.compressedMemory,
                 role: .system,
                 created: Date().timeIntervalSince1970 * 1000,
                 model: config.modelType
@@ -108,6 +118,9 @@ class ChatSessionViewModel {
                     if let last = dataSource.last{
                         if message.id != last.id {
                             dataSource.append(message)
+                            if let willStreaming {
+                                willStreaming()
+                            }
                         } else {
                             let newMessage = message
                             newMessage.content = dataSource[
@@ -117,6 +130,9 @@ class ChatSessionViewModel {
                             dataSource[
                                 dataSource.count - 1
                             ] = newMessage
+                            if let onStreaming {
+                                onStreaming()
+                            }
                         }
                         let now = Date().timeIntervalSince1970 * 1000
                         if isAtBottom && now - lastScrollTime > 100 {
@@ -131,9 +147,10 @@ class ChatSessionViewModel {
                             feedbackGenerator.prepare()
                         }
                     }
-                    if !message.finishReason.isEmpty {
+                    if message.finishReason == "stop" {
                         lastCellSize = .zero
                         compressHistory()
+                        delegate?.reloadList()
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                             let successFB = UINotificationFeedbackGenerator()
                             successFB.notificationOccurred(.success)

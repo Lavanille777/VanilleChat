@@ -50,7 +50,7 @@ private extension MultipartFormDataEntry {
     }
 }
 
-private extension Data {
+extension Data {
     
     mutating func append(_ string: String) {
         let data = string.data(

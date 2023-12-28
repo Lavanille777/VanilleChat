@@ -13,6 +13,8 @@ class ChatInputView: UIView {
     
     @objc var addonsBLK: (()->())?
     
+    @objc var sendImgBLK: (()->())?
+    
     private var effectView = UIVisualEffectView(
         effect: UIBlurEffect(
             style: .systemUltraThinMaterial
@@ -28,7 +30,7 @@ class ChatInputView: UIView {
         )
         v.addTarget(
             self,
-            action: #selector(addonsAction),
+            action: #selector(sendImgAction),
             for: .touchUpInside
         )
     }
@@ -131,6 +133,12 @@ class ChatInputView: UIView {
         }
     }
     
+    @objc private func sendImgAction() {
+        if let sendImgBLK {
+            sendImgBLK()
+        }
+    }
+    
 }
 
 class InputTextView: IQTextView {
@@ -162,6 +170,20 @@ class InputTextView: IQTextView {
 }
 
 extension ChatInputView: UITextViewDelegate {
+    
+    func clearText() {
+        inputTextView.text = ""
+        inputTextView.snp.remakeConstraints { make in
+            make.leading.equalTo(addonsButton.snp.trailing).offset(10)
+            make.trailing.equalTo(sendButton.snp.leading).offset(-10)
+            make.top.equalToSuperview().inset(10)
+            make.bottom.equalToSuperview().inset(10 + GlobleStateManager.shared.mainWindow.safeAreaInsets.bottom)
+            make.height.greaterThanOrEqualTo(46)
+        }
+        layoutIfNeeded()
+    }
+    
+    
     func textViewDidChange(_ textView: UITextView) {
         print(textView.contentSize)
         print(textView.frame)

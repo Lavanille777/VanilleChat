@@ -11,15 +11,12 @@ let kDeafultAPIHost = "api.openai.com"
 let kDeafultAPITimeout = 60.0
 let kAPIModels = [
     Model.gpt3_5Turbo_1106,
-    Model.gpt3_5Turbo,
-    Model.gpt3_5Turbo_16k,
-    Model.gpt3_5Turbo_16k_0613,
     Model.gpt4_1106_preview,
     Model.gpt4,
-    Model.gpt4_32k,
-    Model.gpt4_32k_0613,
+    "gpt-4-vision-compatible",
     "gpt-4-gizmo-g-3w1rEXGE0",
-    "gpt-4-all"
+    "gpt-4-all",
+    "claude-2"
 ]
 
 let kSystemMessageProbability = [
@@ -85,7 +82,6 @@ class ChatRequestor: NSObject {
         let query = ChatQuery.init(
             model: model,
             messages: chatMessages,
-            responseFormat: ResponseFormat(type: .jsonObject),
             temperature: temperature
         )
         // Chats Streaming

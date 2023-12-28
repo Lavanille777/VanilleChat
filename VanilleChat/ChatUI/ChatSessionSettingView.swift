@@ -71,17 +71,17 @@ struct ChatSessionSettingView: View {
             } header: {
                 Text("设置你的系统提示")
             } footer: {
-                Text("对话顶部展示的名称")
+                Text("后面的数字为该提示被携带的概率")
             }
             
             Section {
                 ConfigCellView(
-                    type: .slider(value: $config.temperature, range: 0...1, step: 0.1, precision: 1)
+                    type: .slider(value: $config.temperature, range: 0...2, step: 0.1, precision: 0)
                 )
             } header: {
-                Text("设置你的对话标题")
+                Text("温度")
             } footer: {
-                Text("对话顶部展示的名称")
+                Text("随该值变大 AI 的回复变得更灵活，更不受逻辑限制，默认值 0.7")
             }
             
             Section {
@@ -89,9 +89,7 @@ struct ChatSessionSettingView: View {
                     type: .slider(value: $config.memoryCount.doubleValue, range: 0...64, step: 1.0, precision: 0)
                 )
             } header: {
-                Text("设置你的对话标题")
-            } footer: {
-                Text("对话顶部展示的名称")
+                Text("携带的历史记录数量")
             }
             
             Section {
@@ -101,7 +99,7 @@ struct ChatSessionSettingView: View {
                     }
                     HStack {
                         Slider(value: $config.compressMemoryCount.doubleValue, in: 5...50, step: 1.0) {
-                            Text("aVfdfalue")
+                            
                         } onEditingChanged: { _ in
                             
                         }
@@ -110,19 +108,9 @@ struct ChatSessionSettingView: View {
                     Text("")
                 }
             } header: {
-                Text("设置你的对话标题")
+                Text("历史消息压缩")
             } footer: {
-                Text("对话顶部展示的名称")
-            }
-            
-            Section {
-                ConfigCellView(
-                    type: .textFiled(value: $config.sessionName, placeholder: "请输入标题")
-                )
-            } header: {
-                Text("设置你的对话标题")
-            } footer: {
-                Text("对话顶部展示的名称")
+                Text("例如若设置携带最后3条历史消息，那么将从倒数第4条消息开始进行历史消息压缩")
             }
             
             if config.compressMemoryEnable {
@@ -134,9 +122,9 @@ struct ChatSessionSettingView: View {
                         )
                     )
                 } header: {
-                    Text("设置你的对话标题")
+                    Text("历史消息压缩方法")
                 } footer: {
-                    Text("对话顶部展示的名称")
+                    Text("可以把压缩要求说的详细一点")
                 }
                 
                 Section {
@@ -146,9 +134,7 @@ struct ChatSessionSettingView: View {
                             .font(.footnote)
                     }
                 } header: {
-                    Text("设置你的对话标题")
-                } footer: {
-                    Text("对话顶部展示的名称")
+                    Text("已被压缩的历史消息")
                 }
             }
             
@@ -158,10 +144,8 @@ struct ChatSessionSettingView: View {
                         Text(kAPIModels[$0]).tag(kAPIModels[$0])
                     }
                 }
-            } header: {
-                Text("设置你的对话标题")
             } footer: {
-                Text("对话顶部展示的名称")
+                Text("每次对话都使用你最新设置的模型")
             }
             
             

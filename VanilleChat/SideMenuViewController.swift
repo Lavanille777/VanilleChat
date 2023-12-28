@@ -36,9 +36,9 @@ class SideMenuViewController: UIViewController {
             make.bottom.equalToSuperview().inset(44)
         }
         globleSettingButton.snp.makeConstraints { make in
-            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(10)
-            make.left.equalTo(view.safeAreaLayoutGuide).inset(24)
-            make.width.height.equalTo(24)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(30)
+            make.left.equalTo(view.safeAreaLayoutGuide).inset(36)
+            make.width.height.equalTo(36)
         }
     }
     
@@ -68,6 +68,10 @@ class SideMenuViewController: UIViewController {
             rootView: ChatGlobleSettingView()
                 .environmentObject(ChatGlobleConfigManager.shared.config)
         )
+        hostingVC.title = "全局设置"
+        hostingVC.navigationController?.toolbarItems = [UIBarButtonItem(systemItem: .close, primaryAction: UIAction(handler: { action in
+            hostingVC.dismiss(animated: true)
+        }))]
         present(hostingVC, animated: true)
     }
 }

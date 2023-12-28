@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		01075B2C2B346C4200686C0C /* ChatMessagesStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01075B2B2B346C4200686C0C /* ChatMessagesStorage.swift */; };
+		014AE73D2B3D2C1D002FDF66 /* Superagent in Frameworks */ = {isa = PBXBuildFile; productRef = 014AE73C2B3D2C1D002FDF66 /* Superagent */; };
+		014AE9492B3D56A7002FDF66 /* MarkdownView in Frameworks */ = {isa = PBXBuildFile; productRef = 014AE9482B3D56A7002FDF66 /* MarkdownView */; };
+		014AE94C2B3D5D43002FDF66 /* SwiftyMarkdown in Frameworks */ = {isa = PBXBuildFile; productRef = 014AE94B2B3D5D43002FDF66 /* SwiftyMarkdown */; };
 		0155C0F62B31D9C600D170C2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0155C0F52B31D9C600D170C2 /* AppDelegate.swift */; };
 		0155C0F82B31D9C600D170C2 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0155C0F72B31D9C600D170C2 /* SceneDelegate.swift */; };
 		0155C0FF2B31D9C700D170C2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0155C0FE2B31D9C700D170C2 /* Assets.xcassets */; };
@@ -163,13 +166,16 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				014AE73D2B3D2C1D002FDF66 /* Superagent in Frameworks */,
 				01EA392C2B35968A001DEC01 /* SDWebImageSwiftUI in Frameworks */,
 				016A3E332B37314900CF1D78 /* JXPhotoBrowser in Frameworks */,
 				0155C16C2B31DD3F00D170C2 /* SnapKit in Frameworks */,
 				0155C16F2B31DED300D170C2 /* LookinServer in Frameworks */,
+				014AE9492B3D56A7002FDF66 /* MarkdownView in Frameworks */,
 				0195A5032B31F0CD00B1A427 /* IQKeyboardManagerSwift in Frameworks */,
 				01FAC15B2B355F060014F0DC /* SideMenu in Frameworks */,
 				01EA39282B357672001DEC01 /* MarkdownUI in Frameworks */,
+				014AE94C2B3D5D43002FDF66 /* SwiftyMarkdown in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -397,6 +403,9 @@
 				01EA39272B357672001DEC01 /* MarkdownUI */,
 				01EA392B2B35968A001DEC01 /* SDWebImageSwiftUI */,
 				016A3E322B37314900CF1D78 /* JXPhotoBrowser */,
+				014AE73C2B3D2C1D002FDF66 /* Superagent */,
+				014AE9482B3D56A7002FDF66 /* MarkdownView */,
+				014AE94B2B3D5D43002FDF66 /* SwiftyMarkdown */,
 			);
 			productName = VanilleChat;
 			productReference = 0155C0F22B31D9C600D170C2 /* VanilleChat.app */;
@@ -434,6 +443,9 @@
 				01EA39262B357672001DEC01 /* XCLocalSwiftPackageReference "../../Downloads/swift-markdown-ui-main" */,
 				01EA392A2B35968A001DEC01 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
 				016A3E312B37314900CF1D78 /* XCRemoteSwiftPackageReference "PhotoBrowser" */,
+				014AE73B2B3D2C1D002FDF66 /* XCRemoteSwiftPackageReference "superagent-swift" */,
+				014AE9472B3D56A7002FDF66 /* XCRemoteSwiftPackageReference "MarkdownView" */,
+				014AE94A2B3D5D43002FDF66 /* XCRemoteSwiftPackageReference "SwiftyMarkdown" */,
 			);
 			productRefGroup = 0155C0F32B31D9C600D170C2 /* Products */;
 			projectDirPath = "";
@@ -760,6 +772,30 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		014AE73B2B3D2C1D002FDF66 /* XCRemoteSwiftPackageReference "superagent-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/simonweniger/superagent-swift";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		014AE9472B3D56A7002FDF66 /* XCRemoteSwiftPackageReference "MarkdownView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/keitaoouchi/MarkdownView.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.9.1;
+			};
+		};
+		014AE94A2B3D5D43002FDF66 /* XCRemoteSwiftPackageReference "SwiftyMarkdown" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SimonFairbairn/SwiftyMarkdown.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.4;
+			};
+		};
 		0155C16A2B31DD3F00D170C2 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
@@ -803,6 +839,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		014AE73C2B3D2C1D002FDF66 /* Superagent */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 014AE73B2B3D2C1D002FDF66 /* XCRemoteSwiftPackageReference "superagent-swift" */;
+			productName = Superagent;
+		};
+		014AE9482B3D56A7002FDF66 /* MarkdownView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 014AE9472B3D56A7002FDF66 /* XCRemoteSwiftPackageReference "MarkdownView" */;
+			productName = MarkdownView;
+		};
+		014AE94B2B3D5D43002FDF66 /* SwiftyMarkdown */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 014AE94A2B3D5D43002FDF66 /* XCRemoteSwiftPackageReference "SwiftyMarkdown" */;
+			productName = SwiftyMarkdown;
+		};
 		0155C16B2B31DD3F00D170C2 /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 0155C16A2B31DD3F00D170C2 /* XCRemoteSwiftPackageReference "SnapKit" */;
